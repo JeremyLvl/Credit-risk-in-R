@@ -1,5 +1,5 @@
 # Get loan_data and view its structure
-setwd('C:/Users/jerem/Documents/GitHub/Credit risk')
+setwd('C:/Users/jerem/Documents/GitHub/Credit-risk-in-R')
 loan_data <- read.csv('loan_data.csv')
 attach(loan_data)
 str(loan_data)
@@ -40,28 +40,17 @@ summary(loan_int_rate)
 dim(loan_data)
 
 # We note 3116 null interest rates from 32581 data entries
-int_cat <- cut(loan_int_rate, breaks=c(5,8,11,14,17,20, Inf))
-ggplot(as_tibble(int_cat), mapping = aes(x=value)) +
-  geom_bar() + labs(x='interest rate')
-
-# We replace these with the median interest rate
+# We can replace these with the median interest rate
 median_int <- median(loan_int_rate, na.rm=TRUE)
 na_index <- which(is.na(loan_int_rate))
-loan_data$loan_int_rate[na_index] <- median_int
-attach(loan_data)
-summary(loan_int_rate)
+loan_data_replaced <- loan_data
+loan_data_replaced$loan_int_rate[na_index] <- median_int
 
-#--
+# Instead we categorise and keep an 'NA' category
+loan_data$int_cat <- cut(loan_int_rate, breaks=c(5,7,9,11,13,15,17, Inf))
+levels(loan_data$int_cat) <- c(levels(loan_data$int_cat), 'missing')
+loan_data$int_cat[na_index] <- 'missing'
+ggplot(as_tibble(loan_data$int_cat), mapping = aes(x=value)) +
+  geom_bar() + labs(x='interest rate')
 
-# Set seed of 567
-set.seed(567)
-
-# Store row numbers for training set: index_train
-index_train <- sample(1:nrow(loan_data), 2/3*nrow(loan_data))
-
-# Create training set: training_set
-training_set <- loan_data[index_train, ]
-
-# Create test set: test_set
-test_set <- loan_data[-index_train, ]
-
+write.csv(loan_data, 'loan_data_2.csv')
