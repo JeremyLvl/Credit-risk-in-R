@@ -30,8 +30,8 @@ rpart.plot(undersample)
 
 # This time we tell the model what the prior proportion of default was
 tree_prior <- rpart(loan_status ~ ., data = training_set,
-                       method = 'class', control = rpart.control(cp=0.001),
-                       parms = list(prior = c(0.78, 0.22)))
+                    method = 'class', control = rpart.control(cp=0.001),
+                    parms = list(prior = c(0.78, 0.22)))
 rpart.plot(tree_prior)
 
 # Including a loss matrix
@@ -39,8 +39,8 @@ rpart.plot(tree_prior)
 parms = list(loss = matrix(c(0, 10, 1, 0), ncol=2))
 
 tree_loss <- rpart(loan_status ~ ., data = training_set,
-                    method = 'class', control = rpart.control(cp=0.001),
-                    parms = parms)
+                   method = 'class', control = rpart.control(cp=0.001),
+                   parms = parms)
 rpart.plot(tree_loss)
 
 # This last tree is clearly over-fitting
@@ -63,8 +63,8 @@ rpart.plot(tree_loss_prune)
 # We also include a minimum for the size of nodes and the number of points in a node to be split
 weights <- ifelse(training_set$loan_status == 1, 3, 1)
 tree_weight <- rpart(loan_status ~ ., data = training_set,
-                   method = 'class', control = rpart.control(minsplit = 5, minbucket = 2, cp = 0.001),
-                   weights = weights)
+                     method = 'class', control = rpart.control(minsplit = 5, minbucket = 2, cp = 0.001),
+                     weights = weights)
 rpart.plot(tree_weight)
 
 # Again we prune the tree with the appropriate cp
@@ -79,19 +79,3 @@ pred_loss <- predict(tree_loss, newdata = test_set, type = 'class')
 pred_loss_prune <- predict(tree_loss_prune, newdata = test_set, type = 'class')
 pred_weight <- predict(tree_weight, newdata = test_set, type = 'class')
 pred_weight_prune <- predict(tree_weight_prune, newdata = test_set, type = 'class')
-
-
-# We construct the confusion matrix for these
-conf_prior <- table(test_set$loan_status, pred_prior)
-conf_loss <- table(test_set$loan_status, pred_loss)
-conf_loss_prune <- table(test_set$loan_status, pred_loss_prune)
-conf_weight <- table(test_set$loan_status, pred_weight)
-conf_weight_prune <- table(test_set$loan_status, pred_weight_prune)
-
-
-# And consider the accuracy of each tree
-sum(diag(conf_prior)) / nrow(test_set)
-sum(diag(conf_loss)) / nrow(test_set)
-sum(diag(conf_loss_prune)) / nrow(test_set)
-sum(diag(conf_weight)) / nrow(test_set)
-sum(diag(conf_weight_prune)) / nrow(test_set)
